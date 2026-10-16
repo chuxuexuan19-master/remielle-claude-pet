@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 2,
+  "petId": "xiaolemi-claude",
+  "displayName": "小蕾米",
+  "description": "小蕾米埃尔桌宠 —— 实时反映 Claude Code 的工作状态。事件由 Claude Code hook 写入 status.json，本程序按下面的映射表切换动作。素材沿用原作者 HanaAyane/remielle-codex-pet 的动作语义（idle / expect / pen_idle / draw_continuous / smug / draw_intermittent / think）。",
+  "defaultState": "idle",
+  "playback": {
+    "mode": "once",
+    "restoreState": "previous-or-idle",
+    "interruptLowerPriority": false,
+    "interruptHigherPriority": true
+  },
+  "turn": {
+    "startEvents": [
+      "UserPromptSubmit",
+      "SessionStart"
+    ],
+    "endEvents": [
+      "Stop",
+      "SessionEnd"
+    ]
+  },
+  "lifecycle": {
+    "launchWithClaude": true,
+    "exitWithClaude": true,
+    "claudeProcesses": [
+      "claude.exe"
+    ],
+    "checkEveryMs": 3000,
+    "exitAfterMisses": 10
+  },
+  "window": {
+    "scale": 0.6,
+    "opacity": 1.0,
+    "alwaysOnTop": true,
+    "showLabel": true,
+    "x": 35,
+    "y": 821,
+    "labelFontPt": 18,
+    "labelMaxWidth": 460
+  },
+  "pollMs": 150,
+  "idleTimeoutMs": 300000,
+  "workingTimeoutMs": 90000,
+  "maxDetailChars": 22,
+  "states": {
+    "idle": {
+      "label": "待机",
+      "gif": "assets/gifs/idle.gif",
+      "loop": true,
+      "priority": 0,
+      "note": "原作者 gif/1 = idle，呼吸与眨眼"
+    },
+    "sleep": {
+      "label": "睡着了",
+      "gif": "assets/gifs/sleep.gif",
+      "loop": true,
+      "priority": 5,
+      "note": "从 draw_intermittent.gif 抽第 15/16/17 帧做的循环（每帧 150ms），低头打瞌睡"
+    },
+    "thinking": {
+      "label": "思考中",
+      "gif": "assets/gifs/think.gif",
+      "loop": true,
+      "priority": 40,
+      "note": "原作者 gif/7 = think",
+      "working": true
+    },
+    "tool": {
+      "label": "工作中",
+      "gif": "assets/gifs/draw_continuous.gif",
+      "loop": true,
+      "priority": 50,
+      "note": "原作者 gif/4 = draw_continuous，作者把它映射到 Codex 的 running（工作中）",
+      "working": true
+    },
+    "waiting": {
+      "label": "等你操作",
+      "gif": "assets/gifs/expect.gif",
+      "loop": true,
+      "priority": 70,
+      "note": "原作者 gif/2 = expect，期待地等你"
+    },
+    "greet": {
+      "label": "会话开始",
+      "gif": "assets/gifs/waving.gif",
+      "loop": false,
+      "priority": 95,
+      "durationMs": 1120,
+      "restoreTo": "idle",
+      "note": "精灵图 waving 行（7 张 gif 里没有），作者用于启动问候"
+    },
+    "compact": {
+      "label": "整理上下文",
+      "gif": "assets/gifs/pen_idle.gif",
+      "loop": false,
+      "priority": 90,
+      "durationMs": 2400,
+      "restoreTo": "thinking",
+      "note": "原作者 gif/3 = pen_idle，笔待机"
+    },
+    "error": {
+      "label": "出错了",
+      "gif": "assets/gifs/failed.gif",
+      "loop": false,
+      "priority": 100,
+      "durationMs": 1600,
+      "restoreTo": "previous-or-idle",
+      "note": "精灵图 failed 行（7 张 gif 里没有），作者用于任务失败"
+    },
+    "done": {
+      "label": "任务完成",
+      "gif": "assets/gifs/smug.gif",
+      "loop": false,
+      "priority": 100,
+      "durationMs": 1800,
+      "restoreTo": "idle",
+      "note": "原作者 gif/5 = smug，作者把它映射到 Codex 的 jumping（完成庆祝）"
+    }
+  },
+  "events": [
+    {
+      "event": "SessionStart",
+      "label": "会话开始",
+      "state": "greet",
+      "priority": 95,
+      "cooldownMs": 3000
+    },
+    {
+      "event": "UserPromptSubmit",
+      "label": "你发了消息",
+      "state": "thinking",
+      "priority": 60,
+      "cooldownMs": 500
+    },
+    {
+      "event": "PreToolUse",
+      "label": "工具调用前",
+      "state": "tool",
+      "priority": 70,
+      "cooldownMs": 200
+    },
+    {
+      "event": "PostToolUse",
+      "label": "工具调用后",
+      "state": "thinking",
+      "priority": 60,
+      "cooldownMs": 200
+    },
+    {
+      "event": "PostToolUseFailure",
+      "label": "工具执行失败",
+      "state": "error",
+      "priority": 100,
+      "cooldownMs": 1500
+    },
+    {
+      "event": "Notification",
+      "label": "需要你注意",
+      "state": "waiting",
+      "priority": 85,
+      "cooldownMs": 1000
+    },
+    {
+      "event": "Stop",
+      "label": "回复结束",
+      "state": "done",
+      "priority": 100,
+      "cooldownMs": 1500
+    },
+    {
+      "event": "SubagentStop",
+      "label": "子代理结束",
+      "state": "thinking",
+      "priority": 60,
+      "cooldownMs": 500
+    },
+    {
+      "event": "PreCompact",
+      "label": "压缩上下文",
+      "state": "compact",
+      "priority": 90,
+      "cooldownMs": 2000
+    },
+    {
+      "event": "SessionEnd",
+      "label": "会话结束",
+      "state": "idle",
+      "priority": 80,
+      "cooldownMs": 0
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# ---- 运行时生成的文件（每台机器不同，不入库）----
+pet.log
+pet.pid
+status.json
+python.txt
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
